@@ -29,7 +29,6 @@
             width: 100%;
             border: 3px solid #ffd70066;
         }
-        /* СТАРТОВЫЙ ЭКРАН */
         #startScreen {
             display: flex;
             flex-direction: column;
@@ -168,8 +167,6 @@
             border-radius: 30px;
             border: 1px solid #ffd70044;
         }
-
-        /* ИГРОВОЙ ЭКРАН */
         #gameScreen {
             display: none;
             flex-direction: column;
@@ -226,8 +223,6 @@
         .game-controls button:hover {
             background: #3a6a80;
         }
-
-        /* ЭКРАН РЕЗУЛЬТАТА (только победа) */
         #resultScreen {
             display: none;
             flex-direction: column;
@@ -273,24 +268,20 @@
 </head>
 <body>
 <div class="container">
-    <!-- СТАРТОВЫЙ ЭКРАН -->
     <div id="startScreen">
         <h1>🏃‍♂️ VERB RUNNER</h1>
         <div class="subtitle">Collect 10 coins with your verb endings!</div>
         <div class="char-select" id="charSelect">
-            <!-- Tricky -->
             <div class="char-card" data-char="s">
                 <img src="https://i.pinimg.com/1200x/ff/f0/2e/fff02eb11a310b7ac0fb88edf62393a1.jpg" alt="Tricky" loading="lazy">
                 <div class="name">Tricky</div>
                 <div class="suffix">+ s</div>
             </div>
-            <!-- Jake -->
             <div class="char-card" data-char="es">
                 <img src="https://i.pinimg.com/736x/2d/32/62/2d326200b81ad9818a548109bb826227.jpg" alt="Jake" loading="lazy">
                 <div class="name">Jake</div>
                 <div class="suffix">+ es</div>
             </div>
-            <!-- Fresh -->
             <div class="char-card" data-char="ies">
                 <img src="https://i.pinimg.com/736x/af/e3/1b/afe31b1bf941ad426d1cac15c301f30f.jpg" alt="Fresh" loading="lazy">
                 <div class="name">Fresh</div>
@@ -299,15 +290,14 @@
         </div>
         <div style="color:#fff; font-weight:bold; font-size:1.1rem;">Choose speed:</div>
         <div class="speed-select">
-            <button class="speed-btn" data-speed="0.05">🐢 Slow</button>
-            <button class="speed-btn active" data-speed="0.1">🐇 Medium</button>
-            <button class="speed-btn" data-speed="0.15">🚀 Fast</button>
+            <button class="speed-btn" data-speed="0.5">🐢 Slow</button>
+            <button class="speed-btn active" data-speed="1.0">🐇 Medium</button>
+            <button class="speed-btn" data-speed="1.5">🚀 Fast</button>
         </div>
         <button id="startBtn" disabled>▶ PLAY</button>
         <div class="controls-hint">⬅️ ➡️  or swipe to move</div>
     </div>
 
-    <!-- ИГРОВОЙ ЭКРАН -->
     <div id="gameScreen">
         <div class="top-bar">
             <span>🏆 <span id="scoreDisplay">0</span> / 10</span>
@@ -320,7 +310,6 @@
         </div>
     </div>
 
-    <!-- ЭКРАН ПОБЕДЫ -->
     <div id="resultScreen">
         <h2 class="win-title">🎉 You Win!</h2>
         <p>Collected all 10 coins!</p>
@@ -338,18 +327,17 @@
         ies: ['try','dry','study','fly','cry','carry','worry','copy','marry','hurry','apply','reply','supply','rely','fry']
     };
     const CHAR_NAMES = { s: 'Tricky', es: 'Jake', ies: 'Fresh' };
-    const SPEED_NAMES = { 0.05: 'Slow', 0.1: 'Medium', 0.15: 'Fast' };
+    const SPEED_NAMES = { 0.5: 'Slow', 1.0: 'Medium', 1.5: 'Fast' };
     const WIN_SCORE = 10;
 
     // ============================================================
     //  STATE
     // ============================================================
-    let selectedChar = null;       // 's', 'es', 'ies'
-    let selectedSpeed = 0.1;      // pixels per frame (very slow)
+    let selectedChar = null;
+    let selectedSpeed = 1.0;
     let gameRunning = false;
     let score = 0;
 
-    // Game objects
     let player = { lane: 1, x: 0, y: 0, width: 44, height: 56 };
     let coins = [];
     let obstacles = [];
@@ -363,7 +351,6 @@
     const OBSTACLE_HEIGHT = 50;
     const PLAYER_Y_OFFSET = 420;
 
-    // DOM
     const startScreen = document.getElementById('startScreen');
     const gameScreen = document.getElementById('gameScreen');
     const resultScreen = document.getElementById('resultScreen');
@@ -467,15 +454,15 @@
     }
 
     function update() {
-        // Spawn coins (much slower due to speed scaling)
-        const coinInterval = Math.max(30, 60 - selectedSpeed * 40);
+        // Coin spawn – increased intervals to avoid overlapping
+        const coinInterval = Math.max(45, 90 - selectedSpeed * 20);
         if (++spawnCounter >= coinInterval) {
             spawnCounter = 0;
             spawnCoin();
         }
 
-        // Spawn obstacles (less frequent)
-        const obstacleInterval = Math.max(80, 160 - selectedSpeed * 50);
+        // Obstacle spawn – rare
+        const obstacleInterval = Math.max(100, 200 - selectedSpeed * 30);
         if (++obstacleSpawnCounter >= obstacleInterval) {
             obstacleSpawnCounter = 0;
             spawnObstacle();
@@ -508,7 +495,7 @@
             }
         }
 
-        // Move obstacles – now they subtract 1 point instead of game over
+        // Move obstacles – subtract 1 point on collision
         for (let i = obstacles.length - 1; i >= 0; i--) {
             const ob = obstacles[i];
             ob.y += selectedSpeed;
@@ -516,12 +503,10 @@
                 const playerRect = { x: player.x, y: player.y, width: player.width, height: player.height };
                 const obRect = { x: ob.x, y: ob.y, width: ob.width, height: ob.height };
                 if (rectCollide(playerRect, obRect)) {
-                    // Subtract 1 point if possible
                     if (score > 0) {
                         score--;
                         scoreDisplay.textContent = score;
                     }
-                    // Remove the obstacle
                     obstacles.splice(i, 1);
                     continue;
                 }
@@ -535,7 +520,6 @@
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Background gradient
         const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
         gradient.addColorStop(0, '#0f1a2a');
         gradient.addColorStop(0.5, '#1a2f3f');
@@ -547,7 +531,7 @@
         ctx.strokeStyle = '#ffd70022';
         ctx.lineWidth = 2;
         for (let i = 0; i < 20; i++) {
-            const y = (i * 30 + performance.now() * 0.05 * selectedSpeed * 10) % canvas.height;
+            const y = (i * 30 + performance.now() * 0.05 * selectedSpeed * 5) % canvas.height;
             ctx.beginPath();
             ctx.moveTo(0, y);
             ctx.lineTo(canvas.width, y + 40);
@@ -570,7 +554,7 @@
             }
         }
 
-        // Obstacles (spiky)
+        // Obstacles
         obstacles.forEach(ob => {
             const x = ob.x, y = ob.y, w = ob.width, h = ob.height;
             ctx.shadowColor = '#e74c3c';
@@ -587,7 +571,7 @@
             ctx.fillText('⚠️', x + w/2, y + h/2 + 2);
         });
 
-        // Coins (all yellow)
+        // Coins
         coins.forEach(coin => {
             const x = coin.x, y = coin.y, size = coin.size;
             ctx.shadowColor = '#ffd700';
@@ -707,8 +691,8 @@
         startBtn.disabled = true;
         selectedChar = null;
         speedBtns.forEach(b => b.classList.remove('active'));
-        document.querySelector('.speed-btn[data-speed="0.1"]').classList.add('active');
-        selectedSpeed = 0.1;
+        document.querySelector('.speed-btn[data-speed="1.0"]').classList.add('active');
+        selectedSpeed = 1.0;
     });
 
     startBtn.addEventListener('click', startGame);
@@ -716,8 +700,8 @@
     // ============================================================
     //  INIT
     // ============================================================
-    document.querySelector('.speed-btn[data-speed="0.1"]').classList.add('active');
-    selectedSpeed = 0.1;
+    document.querySelector('.speed-btn[data-speed="1.0"]').classList.add('active');
+    selectedSpeed = 1.0;
 
     if (!CanvasRenderingContext2D.prototype.roundRect) {
         CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
