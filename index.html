@@ -227,7 +227,7 @@
             background: #3a6a80;
         }
 
-        /* ЭКРАН ПОБЕДЫ / ПРОИГРЫША */
+        /* ЭКРАН РЕЗУЛЬТАТА (только победа) */
         #resultScreen {
             display: none;
             flex-direction: column;
@@ -264,7 +264,6 @@
             box-shadow: none;
         }
         .win-title { color: #2ecc71; }
-        .lose-title { color: #e74c3c; }
         @media (max-width: 600px) {
             .char-card { width: 120px; padding: 12px 6px; }
             .char-card img { width: 60px; height: 60px; }
@@ -300,9 +299,9 @@
         </div>
         <div style="color:#fff; font-weight:bold; font-size:1.1rem;">Choose speed:</div>
         <div class="speed-select">
-            <button class="speed-btn" data-speed="1">🐢 Slow</button>
-            <button class="speed-btn active" data-speed="2">🐇 Medium</button>
-            <button class="speed-btn" data-speed="3">🚀 Fast</button>
+            <button class="speed-btn" data-speed="0.05">🐢 Slow</button>
+            <button class="speed-btn active" data-speed="0.1">🐇 Medium</button>
+            <button class="speed-btn" data-speed="0.15">🚀 Fast</button>
         </div>
         <button id="startBtn" disabled>▶ PLAY</button>
         <div class="controls-hint">⬅️ ➡️  or swipe to move</div>
@@ -321,10 +320,10 @@
         </div>
     </div>
 
-    <!-- ЭКРАН РЕЗУЛЬТАТА (победа/поражение) -->
+    <!-- ЭКРАН ПОБЕДЫ -->
     <div id="resultScreen">
-        <h2 id="resultTitle">🎉 You Win!</h2>
-        <p id="resultMsg">Collected 10 coins!</p>
+        <h2 class="win-title">🎉 You Win!</h2>
+        <p>Collected all 10 coins!</p>
         <button id="resultBtn">🔄 Play Again</button>
     </div>
 </div>
@@ -339,17 +338,16 @@
         ies: ['try','dry','study','fly','cry','carry','worry','copy','marry','hurry','apply','reply','supply','rely','fry']
     };
     const CHAR_NAMES = { s: 'Tricky', es: 'Jake', ies: 'Fresh' };
-    const SPEED_NAMES = { 1: 'Slow', 2: 'Medium', 3: 'Fast' };
+    const SPEED_NAMES = { 0.05: 'Slow', 0.1: 'Medium', 0.15: 'Fast' };
     const WIN_SCORE = 10;
 
     // ============================================================
     //  STATE
     // ============================================================
     let selectedChar = null;       // 's', 'es', 'ies'
-    let selectedSpeed = 2;        // pixels per frame (slow 1, medium 2, fast 3)
+    let selectedSpeed = 0.1;      // pixels per frame (very slow)
     let gameRunning = false;
     let score = 0;
-    let lives = 1; // 1 life, collision = game over
 
     // Game objects
     let player = { lane: 1, x: 0, y: 0, width: 44, height: 56 };
@@ -359,11 +357,11 @@
     let spawnCounter = 0;
     let obstacleSpawnCounter = 0;
     const LANE_COUNT = 3;
-    const LANE_WIDTH = 200; // 600/3
-    const COIN_SIZE = 64;   // larger
+    const LANE_WIDTH = 200;
+    const COIN_SIZE = 64;
     const OBSTACLE_WIDTH = 50;
     const OBSTACLE_HEIGHT = 50;
-    const PLAYER_Y_OFFSET = 420; // from top
+    const PLAYER_Y_OFFSET = 420;
 
     // DOM
     const startScreen = document.getElementById('startScreen');
@@ -376,8 +374,6 @@
     const charDisplay = document.getElementById('charDisplay');
     const startBtn = document.getElementById('startBtn');
     const quitBtn = document.getElementById('quitBtn');
-    const resultTitle = document.getElementById('resultTitle');
-    const resultMsg = document.getElementById('resultMsg');
     const resultBtn = document.getElementById('resultBtn');
 
     // ============================================================
@@ -399,7 +395,7 @@
         btn.addEventListener('click', () => {
             speedBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            selectedSpeed = parseInt(btn.dataset.speed);
+            selectedSpeed = parseFloat(btn.dataset.speed);
         });
     });
 
@@ -411,7 +407,6 @@
     }
 
     function spawnCoin() {
-        // pick a random verb type
         const types = ['s', 'es', 'ies'];
         const type = types[Math.floor(Math.random() * types.length)];
         const wordList = VERBS[type];
@@ -419,13 +414,8 @@
         const lane = Math.floor(Math.random() * LANE_COUNT);
         const x = lane * LANE_WIDTH + (LANE_WIDTH - COIN_SIZE) / 2;
         coins.push({
-            x: x,
-            y: -COIN_SIZE,
-            lane: lane,
-            type: type,
-            word: word,
-            size: COIN_SIZE,
-            active: true
+            x, y: -COIN_SIZE, lane, type, word,
+            size: COIN_SIZE, active: true
         });
     }
 
@@ -433,11 +423,8 @@
         const lane = Math.floor(Math.random() * LANE_COUNT);
         const x = lane * LANE_WIDTH + (LANE_WIDTH - OBSTACLE_WIDTH) / 2;
         obstacles.push({
-            x: x,
-            y: -OBSTACLE_HEIGHT,
-            lane: lane,
-            width: OBSTACLE_WIDTH,
-            height: OBSTACLE_HEIGHT,
+            x, y: -OBSTACLE_HEIGHT, lane,
+            width: OBSTACLE_WIDTH, height: OBSTACLE_HEIGHT,
             active: true
         });
     }
@@ -480,15 +467,15 @@
     }
 
     function update() {
-        // Spawn coins (interval depends on speed)
-        const coinInterval = Math.max(20, 50 - selectedSpeed * 8);
+        // Spawn coins (much slower due to speed scaling)
+        const coinInterval = Math.max(30, 60 - selectedSpeed * 40);
         if (++spawnCounter >= coinInterval) {
             spawnCounter = 0;
             spawnCoin();
         }
 
         // Spawn obstacles (less frequent)
-        const obstacleInterval = Math.max(40, 90 - selectedSpeed * 12);
+        const obstacleInterval = Math.max(80, 160 - selectedSpeed * 50);
         if (++obstacleSpawnCounter >= obstacleInterval) {
             obstacleSpawnCounter = 0;
             spawnObstacle();
@@ -508,7 +495,7 @@
                         scoreDisplay.textContent = score;
                         if (score >= WIN_SCORE) {
                             gameRunning = false;
-                            showResult(true);
+                            showWin();
                             return;
                         }
                     }
@@ -521,7 +508,7 @@
             }
         }
 
-        // Move obstacles
+        // Move obstacles – now they subtract 1 point instead of game over
         for (let i = obstacles.length - 1; i >= 0; i--) {
             const ob = obstacles[i];
             ob.y += selectedSpeed;
@@ -529,10 +516,14 @@
                 const playerRect = { x: player.x, y: player.y, width: player.width, height: player.height };
                 const obRect = { x: ob.x, y: ob.y, width: ob.width, height: ob.height };
                 if (rectCollide(playerRect, obRect)) {
-                    // Game over
-                    gameRunning = false;
-                    showResult(false);
-                    return;
+                    // Subtract 1 point if possible
+                    if (score > 0) {
+                        score--;
+                        scoreDisplay.textContent = score;
+                    }
+                    // Remove the obstacle
+                    obstacles.splice(i, 1);
+                    continue;
                 }
             }
             if (ob.y > canvas.height + 50) {
@@ -544,7 +535,7 @@
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // ---- Dynamic background (graffiti style) ----
+        // Background gradient
         const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
         gradient.addColorStop(0, '#0f1a2a');
         gradient.addColorStop(0.5, '#1a2f3f');
@@ -552,11 +543,11 @@
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Decorative lines (like speed lines)
+        // Speed lines
         ctx.strokeStyle = '#ffd70022';
         ctx.lineWidth = 2;
         for (let i = 0; i < 20; i++) {
-            const y = (i * 30 + performance.now() * 0.05 * selectedSpeed) % canvas.height;
+            const y = (i * 30 + performance.now() * 0.05 * selectedSpeed * 10) % canvas.height;
             ctx.beginPath();
             ctx.moveTo(0, y);
             ctx.lineTo(canvas.width, y + 40);
@@ -569,19 +560,17 @@
             ctx.strokeStyle = '#ffffff33';
             ctx.lineWidth = 2;
             ctx.strokeRect(x, 0, LANE_WIDTH, canvas.height);
-            // Glowing edge
             ctx.shadowColor = '#ffd70022';
             ctx.shadowBlur = 10;
             ctx.strokeRect(x, 0, LANE_WIDTH, canvas.height);
             ctx.shadowBlur = 0;
-            // dashed center
             ctx.fillStyle = '#ffffff22';
             for (let y = 0; y < canvas.height; y += 50) {
                 ctx.fillRect(x + LANE_WIDTH/2 - 2, y, 4, 25);
             }
         }
 
-        // ---- Draw obstacles (spiky boxes) ----
+        // Obstacles (spiky)
         obstacles.forEach(ob => {
             const x = ob.x, y = ob.y, w = ob.width, h = ob.height;
             ctx.shadowColor = '#e74c3c';
@@ -598,10 +587,9 @@
             ctx.fillText('⚠️', x + w/2, y + h/2 + 2);
         });
 
-        // ---- Draw coins (all yellow) ----
+        // Coins (all yellow)
         coins.forEach(coin => {
             const x = coin.x, y = coin.y, size = coin.size;
-            // Glow
             ctx.shadowColor = '#ffd700';
             ctx.shadowBlur = 25;
             ctx.beginPath();
@@ -612,7 +600,6 @@
             ctx.strokeStyle = '#f39c12';
             ctx.lineWidth = 3;
             ctx.stroke();
-            // Text (verb)
             ctx.fillStyle = '#1a2f3f';
             ctx.font = 'bold 14px sans-serif';
             ctx.textAlign = 'center';
@@ -621,7 +608,7 @@
             ctx.fillText(word, x + size/2, y + size/2 + 1);
         });
 
-        // ---- Player ----
+        // Player
         const px = player.x, py = player.y;
         ctx.shadowColor = '#ffd700';
         ctx.shadowBlur = 30;
@@ -630,7 +617,6 @@
         ctx.roundRect(px, py, player.width, player.height, 12);
         ctx.fill();
         ctx.shadowBlur = 0;
-        // Emoji
         ctx.fillStyle = '#fff';
         ctx.font = '36px sans-serif';
         ctx.textAlign = 'center';
@@ -641,14 +627,12 @@
         else if (selectedChar === 'ies') emoji = '🐱';
         ctx.fillText(emoji, px + player.width/2, py + player.height/2 - 2);
 
-        // Name label
         ctx.fillStyle = '#ffd700';
         ctx.font = 'bold 12px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
         ctx.fillText(CHAR_NAMES[selectedChar], px + player.width/2, py - 4);
 
-        // Score progress
         ctx.fillStyle = '#ffffffcc';
         ctx.font = 'bold 16px sans-serif';
         ctx.textAlign = 'right';
@@ -656,36 +640,11 @@
         ctx.fillText('Goal: ' + score + '/' + WIN_SCORE, canvas.width - 15, 12);
     }
 
-    // ============================================================
-    //  RESULT SCREEN
-    // ============================================================
-    function showResult(win) {
+    function showWin() {
         gameScreen.style.display = 'none';
         resultScreen.style.display = 'flex';
-        if (win) {
-            resultTitle.className = 'win-title';
-            resultTitle.textContent = '🎉 You Win!';
-            resultMsg.textContent = 'Collected all 10 coins!';
-        } else {
-            resultTitle.className = 'lose-title';
-            resultTitle.textContent = '💥 Game Over';
-            resultMsg.textContent = 'Hit an obstacle! Try again.';
-        }
         if (frameId) cancelAnimationFrame(frameId);
     }
-
-    resultBtn.addEventListener('click', () => {
-        resultScreen.style.display = 'none';
-        startScreen.style.display = 'flex';
-        // Reset selection
-        charCards.forEach(c => c.classList.remove('selected'));
-        startBtn.disabled = true;
-        selectedChar = null;
-        // Reset speed to medium
-        speedBtns.forEach(b => b.classList.remove('active'));
-        document.querySelector('.speed-btn[data-speed="2"]').classList.add('active');
-        selectedSpeed = 2;
-    });
 
     // ============================================================
     //  CONTROLS
@@ -703,7 +662,6 @@
         }
     });
 
-    // Touch swipes
     let touchStartX = 0;
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
@@ -732,7 +690,6 @@
         }
     }, { passive: false });
 
-    // Quit
     quitBtn.addEventListener('click', () => {
         gameRunning = false;
         if (frameId) cancelAnimationFrame(frameId);
@@ -743,17 +700,25 @@
         selectedChar = null;
     });
 
-    // Start button
+    resultBtn.addEventListener('click', () => {
+        resultScreen.style.display = 'none';
+        startScreen.style.display = 'flex';
+        charCards.forEach(c => c.classList.remove('selected'));
+        startBtn.disabled = true;
+        selectedChar = null;
+        speedBtns.forEach(b => b.classList.remove('active'));
+        document.querySelector('.speed-btn[data-speed="0.1"]').classList.add('active');
+        selectedSpeed = 0.1;
+    });
+
     startBtn.addEventListener('click', startGame);
 
     // ============================================================
     //  INIT
     // ============================================================
-    // Set default speed active
-    document.querySelector('.speed-btn[data-speed="2"]').classList.add('active');
-    selectedSpeed = 2;
+    document.querySelector('.speed-btn[data-speed="0.1"]').classList.add('active');
+    selectedSpeed = 0.1;
 
-    // Polyfill for roundRect
     if (!CanvasRenderingContext2D.prototype.roundRect) {
         CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
             if (r > w/2) r = w/2;
