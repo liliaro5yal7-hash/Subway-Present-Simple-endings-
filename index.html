@@ -356,9 +356,10 @@
     const PLAYER_Y_OFFSET = 420;
     const MIN_DIST_BETWEEN_OBJECTS = 160;
 
-    const MIN_SPAWN_INTERVAL = 240;
-    const MAX_SPAWN_INTERVAL = 400;
-    let nextSpawnInterval = 300;
+    // Новые интервалы спавна – монеты появляются гораздо чаще
+    const MIN_SPAWN_INTERVAL = 80;
+    const MAX_SPAWN_INTERVAL = 180;
+    let nextSpawnInterval = 120;
 
     const startScreen = document.getElementById('startScreen');
     const gameScreen = document.getElementById('gameScreen');
@@ -402,6 +403,7 @@
         return lane * LANE_WIDTH + (LANE_WIDTH - player.width) / 2;
     }
 
+    // Проверка близости для препятствий
     function isTooClose(lane, yPos, objects) {
         for (let obj of objects) {
             if (obj.lane === lane && Math.abs(obj.y - yPos) < MIN_DIST_BETWEEN_OBJECTS) {
@@ -411,38 +413,40 @@
         return false;
     }
 
-    function spawnCoin() {
+    // Спавн одной монеты на указанной дорожке (без проверки близости)
+    function spawnCoinOnLane(lane) {
         const types = ['s', 'es', 'ies'];
         const type = types[Math.floor(Math.random() * types.length)];
         const wordList = VERBS[type];
         const word = wordList[Math.floor(Math.random() * wordList.length)];
-        const lane = Math.floor(Math.random() * LANE_COUNT);
         const x = lane * LANE_WIDTH + (LANE_WIDTH - COIN_SIZE) / 2;
-        const yPos = -COIN_SIZE;
-        if (isTooClose(lane, yPos, coins) || isTooClose(lane, yPos, obstacles)) {
-            for (let altLane = 0; altLane < LANE_COUNT; altLane++) {
-                if (altLane !== lane && !isTooClose(altLane, yPos, coins) && !isTooClose(altLane, yPos, obstacles)) {
-                    const altX = altLane * LANE_WIDTH + (LANE_WIDTH - COIN_SIZE) / 2;
-                    coins.push({
-                        x: altX, y: yPos, lane: altLane, type, word,
-                        size: COIN_SIZE, active: true
-                    });
-                    return;
-                }
-            }
-            return;
-        }
+        const yPos = -COIN_SIZE - Math.random() * 20; // небольшой разброс по вертикали
         coins.push({
             x, y: yPos, lane, type, word,
             size: COIN_SIZE, active: true
         });
     }
 
+    // Спавн нескольких монет (2-3) на разных дорожках
+    function spawnMultipleCoins() {
+        // Перемешиваем дорожки и берём первые 2 или 3
+        const lanes = [0, 1, 2];
+        const count = Math.floor(Math.random() * 2) + 2; // 2 или 3
+        const shuffled = lanes.sort(() => Math.random() - 0.5);
+        const selectedLanes = shuffled.slice(0, count);
+        for (let lane of selectedLanes) {
+            spawnCoinOnLane(lane);
+        }
+    }
+
+    // Спавн препятствия с проверкой близости
     function spawnObstacle() {
         const lane = Math.floor(Math.random() * LANE_COUNT);
         const x = lane * LANE_WIDTH + (LANE_WIDTH - OBSTACLE_WIDTH) / 2;
         const yPos = -OBSTACLE_HEIGHT;
+        // Проверяем, нет ли объектов близко на этой дорожке
         if (isTooClose(lane, yPos, coins) || isTooClose(lane, yPos, obstacles)) {
+            // Пробуем другие дорожки
             for (let altLane = 0; altLane < LANE_COUNT; altLane++) {
                 if (altLane !== lane && !isTooClose(altLane, yPos, coins) && !isTooClose(altLane, yPos, obstacles)) {
                     const altX = altLane * LANE_WIDTH + (LANE_WIDTH - OBSTACLE_WIDTH) / 2;
@@ -454,6 +458,7 @@
                     return;
                 }
             }
+            // Если все дорожки заняты – ничего не спавним
             return;
         }
         obstacles.push({
@@ -479,7 +484,7 @@
         coins = [];
         obstacles = [];
         spawnCounter = 0;
-        nextSpawnInterval = 300;
+        nextSpawnInterval = 120;
         player.lane = 1;
         player.x = getLaneX(1);
         player.y = PLAYER_Y_OFFSET;
@@ -505,14 +510,16 @@
         if (spawnCounter >= nextSpawnInterval) {
             spawnCounter = 0;
             nextSpawnInterval = Math.floor(Math.random() * (MAX_SPAWN_INTERVAL - MIN_SPAWN_INTERVAL + 1)) + MIN_SPAWN_INTERVAL;
-            const isCoin = Math.random() < 0.6;
-            if (isCoin) {
-                spawnCoin();
+
+            // Решаем, что спавнить: 80% монеты (2-3 штуки), 20% препятствие
+            if (Math.random() < 0.8) {
+                spawnMultipleCoins();
             } else {
                 spawnObstacle();
             }
         }
 
+        // Движение монет
         for (let i = coins.length - 1; i >= 0; i--) {
             const coin = coins[i];
             coin.y += selectedSpeed;
@@ -539,6 +546,7 @@
             }
         }
 
+        // Движение препятствий
         for (let i = obstacles.length - 1; i >= 0; i--) {
             const ob = obstacles[i];
             ob.y += selectedSpeed;
