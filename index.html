@@ -295,12 +295,12 @@
         </div>
         <div style="color:#fff; font-weight:bold; font-size:1.1rem; text-shadow: 2px 2px 0 #000;">Choose speed:</div>
         <div class="speed-select">
-            <button class="speed-btn" data-speed="0.3">🐢 Slow</button>
-            <button class="speed-btn active" data-speed="0.5">🐇 Medium</button>
-            <button class="speed-btn" data-speed="0.7">🚀 Fast</button>
+            <button class="speed-btn" data-speed="0.55">🐢 Slow</button>
+            <button class="speed-btn active" data-speed="0.75">🐇 Medium</button>
+            <button class="speed-btn" data-speed="0.95">🚀 Fast</button>
         </div>
         <button id="startBtn" disabled>▶ PLAY</button>
-        <div class="controls-hint">⬅️ ➡️  or swipe to move</div>
+        <div class="controls-hint">⬅️ ➡️  or tap left/right side of screen</div>
     </div>
 
     <div id="gameScreen">
@@ -332,14 +332,14 @@
         ies: ['try','dry','study','fly','cry','carry','worry','copy','marry','hurry','apply','reply','supply','rely','fry']
     };
     const CHAR_NAMES = { s: 'Tricky', es: 'Jake', ies: 'Fresh' };
-    const SPEED_NAMES = { 0.3: 'Slow', 0.5: 'Medium', 0.7: 'Fast' };
+    const SPEED_NAMES = { 0.55: 'Slow', 0.75: 'Medium', 0.95: 'Fast' };
     const WIN_SCORE = 10;
 
     // ============================================================
     //  STATE
     // ============================================================
     let selectedChar = null;
-    let selectedSpeed = 0.5;
+    let selectedSpeed = 0.75;
     let gameRunning = false;
     let score = 0;
 
@@ -354,12 +354,11 @@
     const OBSTACLE_WIDTH = 50;
     const OBSTACLE_HEIGHT = 50;
     const PLAYER_Y_OFFSET = 420;
-    const MIN_DIST_BETWEEN_OBJECTS = 160; // минимальное расстояние по Y между объектами на одной дорожке
+    const MIN_DIST_BETWEEN_OBJECTS = 160;
 
-    // Настройки спавна
     const MIN_SPAWN_INTERVAL = 240;
     const MAX_SPAWN_INTERVAL = 400;
-    let nextSpawnInterval = 300; // будет пересчитываться случайно
+    let nextSpawnInterval = 300;
 
     const startScreen = document.getElementById('startScreen');
     const gameScreen = document.getElementById('gameScreen');
@@ -403,7 +402,6 @@
         return lane * LANE_WIDTH + (LANE_WIDTH - player.width) / 2;
     }
 
-    // Проверка, есть ли объект на той же дорожке и близко по Y
     function isTooClose(lane, yPos, objects) {
         for (let obj of objects) {
             if (obj.lane === lane && Math.abs(obj.y - yPos) < MIN_DIST_BETWEEN_OBJECTS) {
@@ -420,10 +418,8 @@
         const word = wordList[Math.floor(Math.random() * wordList.length)];
         const lane = Math.floor(Math.random() * LANE_COUNT);
         const x = lane * LANE_WIDTH + (LANE_WIDTH - COIN_SIZE) / 2;
-        // Проверяем, не слишком ли близко к другим объектам на этой дорожке
         const yPos = -COIN_SIZE;
         if (isTooClose(lane, yPos, coins) || isTooClose(lane, yPos, obstacles)) {
-            // пробуем другую дорожку
             for (let altLane = 0; altLane < LANE_COUNT; altLane++) {
                 if (altLane !== lane && !isTooClose(altLane, yPos, coins) && !isTooClose(altLane, yPos, obstacles)) {
                     const altX = altLane * LANE_WIDTH + (LANE_WIDTH - COIN_SIZE) / 2;
@@ -434,7 +430,6 @@
                     return;
                 }
             }
-            // если все дорожки заняты, не спавним
             return;
         }
         coins.push({
@@ -506,14 +501,10 @@
     }
 
     function update() {
-        // Спавн с переменным интервалом
         spawnCounter++;
         if (spawnCounter >= nextSpawnInterval) {
             spawnCounter = 0;
-            // случайный интервал до следующего спавна
             nextSpawnInterval = Math.floor(Math.random() * (MAX_SPAWN_INTERVAL - MIN_SPAWN_INTERVAL + 1)) + MIN_SPAWN_INTERVAL;
-
-            // Решаем, что спавнить: монета (60%) или препятствие (40%)
             const isCoin = Math.random() < 0.6;
             if (isCoin) {
                 spawnCoin();
@@ -522,7 +513,6 @@
             }
         }
 
-        // Движение монет
         for (let i = coins.length - 1; i >= 0; i--) {
             const coin = coins[i];
             coin.y += selectedSpeed;
@@ -549,7 +539,6 @@
             }
         }
 
-        // Движение препятствий
         for (let i = obstacles.length - 1; i >= 0; i--) {
             const ob = obstacles[i];
             ob.y += selectedSpeed;
@@ -574,7 +563,6 @@
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Яркий фон
         const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
         gradient.addColorStop(0, '#ff006e');
         gradient.addColorStop(0.3, '#8338ec');
@@ -583,7 +571,6 @@
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Граффити-элементы
         const time = performance.now() * 0.001;
         ctx.globalAlpha = 0.3;
         ctx.fillStyle = '#ff006e';
@@ -604,7 +591,6 @@
         }
         ctx.globalAlpha = 1;
 
-        // Скоростные линии
         ctx.strokeStyle = '#ffbe0b88';
         ctx.lineWidth = 3;
         for (let i = 0; i < 15; i++) {
@@ -615,7 +601,6 @@
             ctx.stroke();
         }
 
-        // Дорожки
         for (let i = 0; i < LANE_COUNT; i++) {
             const x = i * LANE_WIDTH;
             ctx.strokeStyle = '#ffbe0b';
@@ -630,7 +615,6 @@
             }
         }
 
-        // Препятствия
         obstacles.forEach(ob => {
             const x = ob.x, y = ob.y, w = ob.width, h = ob.height;
             ctx.shadowColor = '#ff006e';
@@ -650,7 +634,6 @@
             ctx.fillText('⚠️', x + w/2, y + h/2 + 2);
         });
 
-        // Монеты
         coins.forEach(coin => {
             const x = coin.x, y = coin.y, size = coin.size;
             ctx.shadowColor = '#ffbe0b';
@@ -671,7 +654,6 @@
             ctx.fillText(word, x + size/2, y + size/2 + 1);
         });
 
-        // Игрок
         const px = player.x, py = player.y;
         ctx.shadowColor = '#06ffa5';
         ctx.shadowBlur = 35;
@@ -721,6 +703,7 @@
     // ============================================================
     //  CONTROLS
     // ============================================================
+    // Клавиши
     document.addEventListener('keydown', (e) => {
         if (!gameRunning) return;
         if (e.key === 'ArrowLeft' && player.lane > 0) {
@@ -734,6 +717,7 @@
         }
     });
 
+    // Свайпы
     let touchStartX = 0;
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
@@ -762,6 +746,67 @@
         }
     }, { passive: false });
 
+    // Новое: управление нажатием (клик по левой/правой половине)
+    function handleTap(e) {
+        if (!gameRunning) return;
+        const rect = canvas.getBoundingClientRect();
+        let clientX;
+        if (e.touches) {
+            e.preventDefault();
+            clientX = e.touches[0].clientX;
+        } else {
+            clientX = e.clientX;
+        }
+        const x = (clientX - rect.left) / rect.width * canvas.width;
+        if (x < canvas.width / 2) {
+            // левая половина - влево
+            if (player.lane > 0) {
+                player.lane--;
+                player.x = getLaneX(player.lane);
+            }
+        } else {
+            // правая половина - вправо
+            if (player.lane < LANE_COUNT - 1) {
+                player.lane++;
+                player.x = getLaneX(player.lane);
+            }
+        }
+    }
+
+    canvas.addEventListener('click', handleTap);
+    canvas.addEventListener('touchstart', (e) => {
+        // Если это одиночный тап (не свайп), обрабатываем как нажатие
+        // Для различия со свайпом используем флаг
+        if (e.touches.length === 1) {
+            // Запоминаем время и позицию для отличия от свайпа
+            canvas._tapStartTime = Date.now();
+            canvas._tapStartX = e.touches[0].clientX;
+        }
+    }, { passive: true });
+
+    // Обрабатываем touchend как тап, если не было значительного движения
+    canvas.addEventListener('touchend', (e) => {
+        if (!gameRunning) return;
+        if (canvas._tapStartTime && Date.now() - canvas._tapStartTime < 300) {
+            // Это был короткий тап без движения - считаем кликом
+            const touch = e.changedTouches[0];
+            const rect = canvas.getBoundingClientRect();
+            const x = (touch.clientX - rect.left) / rect.width * canvas.width;
+            if (x < canvas.width / 2) {
+                if (player.lane > 0) {
+                    player.lane--;
+                    player.x = getLaneX(player.lane);
+                }
+            } else {
+                if (player.lane < LANE_COUNT - 1) {
+                    player.lane++;
+                    player.x = getLaneX(player.lane);
+                }
+            }
+        }
+        canvas._tapStartTime = null;
+    }, { passive: true });
+
     quitBtn.addEventListener('click', () => {
         gameRunning = false;
         if (frameId) cancelAnimationFrame(frameId);
@@ -779,8 +824,8 @@
         startBtn.disabled = true;
         selectedChar = null;
         speedBtns.forEach(b => b.classList.remove('active'));
-        document.querySelector('.speed-btn[data-speed="0.5"]').classList.add('active');
-        selectedSpeed = 0.5;
+        document.querySelector('.speed-btn[data-speed="0.75"]').classList.add('active');
+        selectedSpeed = 0.75;
     });
 
     startBtn.addEventListener('click', startGame);
@@ -788,8 +833,8 @@
     // ============================================================
     //  INIT
     // ============================================================
-    document.querySelector('.speed-btn[data-speed="0.5"]').classList.add('active');
-    selectedSpeed = 0.5;
+    document.querySelector('.speed-btn[data-speed="0.75"]').classList.add('active');
+    selectedSpeed = 0.75;
 
     if (!CanvasRenderingContext2D.prototype.roundRect) {
         CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
