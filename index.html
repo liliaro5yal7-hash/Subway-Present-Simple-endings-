@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Verb Runner – Subway Style</title>
+    <title>Verb Runner – Graffiti Style</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
             user-select: none;
         }
         body {
-            background: #0b0e1a;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
@@ -21,14 +21,15 @@
             padding: 10px;
         }
         .container {
-            background: linear-gradient(145deg, #1b2a3a, #0f1a2a);
+            background: linear-gradient(145deg, #ff006e, #8338ec, #3a86ff);
             padding: 20px;
             border-radius: 40px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.8);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 60px rgba(255,0,110,0.5);
             max-width: 700px;
             width: 100%;
-            border: 3px solid #ffd70066;
+            border: 4px solid #ffbe0b;
         }
+        /* СТАРТОВЫЙ ЭКРАН */
         #startScreen {
             display: flex;
             flex-direction: column;
@@ -37,22 +38,23 @@
             padding: 10px 0;
         }
         #startScreen h1 {
-            color: #ffd700;
+            color: #ffbe0b;
             font-size: 2.6rem;
-            text-shadow: 0 0 20px #ffa500, 0 0 40px #ff8c00;
+            text-shadow: 0 0 20px #ff006e, 0 0 40px #8338ec, 3px 3px 0 #000;
             letter-spacing: 3px;
             text-align: center;
             font-weight: 900;
             margin-bottom: 5px;
         }
         .subtitle {
-            color: #88c0e0;
+            color: #fff;
             font-size: 1rem;
-            background: #1a2f3fcc;
+            background: rgba(0,0,0,0.5);
             padding: 6px 20px;
             border-radius: 30px;
-            border: 1px solid #ffd70055;
+            border: 2px solid #ffbe0b;
             margin-top: -10px;
+            font-weight: bold;
         }
         .char-select {
             display: flex;
@@ -63,7 +65,7 @@
             margin: 8px 0;
         }
         .char-card {
-            background: linear-gradient(145deg, #2a4b5e, #1e3a4a);
+            background: linear-gradient(145deg, #ff006e, #8338ec);
             border-radius: 30px;
             padding: 18px 10px 14px;
             width: 150px;
@@ -75,12 +77,12 @@
         }
         .char-card:hover {
             transform: scale(1.04);
-            border-color: #ffd700;
+            border-color: #ffbe0b;
         }
         .char-card.selected {
-            border-color: #ffd700;
-            background: #2f5a70;
-            box-shadow: 0 0 30px #ffd70066;
+            border-color: #ffbe0b;
+            background: linear-gradient(145deg, #fb5607, #ff006e);
+            box-shadow: 0 0 30px #ffbe0b;
         }
         .char-card img {
             width: 80px;
@@ -89,19 +91,19 @@
             object-fit: cover;
             background: #fff;
             padding: 3px;
-            border: 2px solid #ffd700;
+            border: 3px solid #ffbe0b;
         }
         .char-card .name {
             color: #fff;
             font-weight: bold;
             font-size: 1.3rem;
             margin-top: 8px;
-            text-shadow: 0 0 8px #000;
+            text-shadow: 2px 2px 0 #000;
         }
         .char-card .suffix {
-            color: #ffd700;
+            color: #ffbe0b;
             font-size: 1.1rem;
-            background: #1a2f3f;
+            background: rgba(0,0,0,0.6);
             padding: 4px 14px;
             border-radius: 30px;
             display: inline-block;
@@ -116,7 +118,7 @@
             margin: 5px 0;
         }
         .speed-btn {
-            background: linear-gradient(145deg, #2a4b5e, #1a3a4a);
+            background: linear-gradient(145deg, #3a86ff, #8338ec);
             border: 2px solid transparent;
             padding: 10px 28px;
             border-radius: 40px;
@@ -131,42 +133,46 @@
             transform: scale(1.05);
         }
         .speed-btn.active {
-            border-color: #ffd700;
-            background: #3a6a80;
-            box-shadow: 0 0 20px #ffd70077;
+            border-color: #ffbe0b;
+            background: linear-gradient(145deg, #ff006e, #fb5607);
+            box-shadow: 0 0 20px #ffbe0b;
         }
         #startBtn {
-            background: linear-gradient(145deg, #ffd700, #f0b800);
+            background: linear-gradient(145deg, #ffbe0b, #fb5607);
             border: none;
             padding: 16px 60px;
             border-radius: 60px;
             font-size: 1.6rem;
             font-weight: 900;
-            color: #1a2f3f;
+            color: #000;
             cursor: pointer;
             transition: 0.25s;
-            box-shadow: 0 8px 0 #b38f00, 0 0 30px #ffd70055;
+            box-shadow: 0 8px 0 #c77600, 0 0 30px #ffbe0b;
             letter-spacing: 1px;
             margin-top: 8px;
+            text-shadow: 1px 1px 0 #fff;
         }
         #startBtn:active {
             transform: translateY(8px);
-            box-shadow: 0 0 20px #ffd70077;
+            box-shadow: 0 0 20px #ffbe0b;
         }
         #startBtn:disabled {
             opacity: 0.4;
             transform: translateY(4px);
-            box-shadow: 0 4px 0 #b38f00;
+            box-shadow: 0 4px 0 #c77600;
             pointer-events: none;
         }
         .controls-hint {
-            color: #88c0e0;
+            color: #fff;
             font-size: 0.85rem;
-            background: #0f1a2acc;
+            background: rgba(0,0,0,0.5);
             padding: 6px 18px;
             border-radius: 30px;
-            border: 1px solid #ffd70044;
+            border: 2px solid #ffbe0b;
+            font-weight: bold;
         }
+
+        /* ИГРОВОЙ ЭКРАН */
         #gameScreen {
             display: none;
             flex-direction: column;
@@ -183,14 +189,15 @@
             padding: 0 8px;
         }
         .top-bar span {
-            background: #1a2f3fcc;
+            background: rgba(0,0,0,0.6);
             padding: 6px 18px;
             border-radius: 30px;
-            border: 2px solid #ffd700;
+            border: 2px solid #ffbe0b;
             backdrop-filter: blur(4px);
+            text-shadow: 1px 1px 0 #000;
         }
         canvas {
-            background: #0b1a2e;
+            background: linear-gradient(180deg, #ff006e 0%, #8338ec 50%, #3a86ff 100%);
             border-radius: 24px;
             display: block;
             width: 100%;
@@ -198,8 +205,8 @@
             aspect-ratio: 600 / 500;
             touch-action: none;
             cursor: pointer;
-            box-shadow: inset 0 0 40px #00000099, 0 0 30px #ffd70033;
-            border: 2px solid #ffd70066;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.5), 0 0 30px #ffbe0b;
+            border: 3px solid #ffbe0b;
         }
         .game-controls {
             display: flex;
@@ -208,7 +215,7 @@
             width: 100%;
         }
         .game-controls button {
-            background: #2a4b5e;
+            background: linear-gradient(145deg, #ff006e, #8338ec);
             border: none;
             padding: 8px 25px;
             border-radius: 40px;
@@ -216,13 +223,14 @@
             font-weight: bold;
             cursor: pointer;
             font-size: 1rem;
-            border: 2px solid #ffd70066;
+            border: 2px solid #ffbe0b;
             transition: 0.2s;
-            background: #1a3a4a;
         }
         .game-controls button:hover {
-            background: #3a6a80;
+            background: linear-gradient(145deg, #fb5607, #ff006e);
         }
+
+        /* ЭКРАН РЕЗУЛЬТАТА (только победа) */
         #resultScreen {
             display: none;
             flex-direction: column;
@@ -233,32 +241,34 @@
         }
         #resultScreen h2 {
             font-size: 3rem;
-            text-shadow: 0 0 30px currentColor;
+            text-shadow: 0 0 30px currentColor, 3px 3px 0 #000;
         }
         #resultScreen p {
             color: #fff;
             font-size: 1.4rem;
-            background: #1a2f3fcc;
+            background: rgba(0,0,0,0.6);
             padding: 10px 30px;
             border-radius: 40px;
+            font-weight: bold;
         }
         #resultScreen button {
-            background: #ffd700;
+            background: linear-gradient(145deg, #ffbe0b, #fb5607);
             border: none;
             padding: 14px 50px;
             border-radius: 60px;
             font-size: 1.4rem;
             font-weight: bold;
-            color: #1a2f3f;
+            color: #000;
             cursor: pointer;
             transition: 0.2s;
-            box-shadow: 0 6px 0 #b38f00;
+            box-shadow: 0 6px 0 #c77600;
+            text-shadow: 1px 1px 0 #fff;
         }
         #resultScreen button:active {
             transform: translateY(6px);
             box-shadow: none;
         }
-        .win-title { color: #2ecc71; }
+        .win-title { color: #06ffa5; }
         @media (max-width: 600px) {
             .char-card { width: 120px; padding: 12px 6px; }
             .char-card img { width: 60px; height: 60px; }
@@ -268,36 +278,41 @@
 </head>
 <body>
 <div class="container">
+    <!-- СТАРТОВЫЙ ЭКРАН -->
     <div id="startScreen">
         <h1>🏃‍♂️ VERB RUNNER</h1>
         <div class="subtitle">Collect 10 coins with your verb endings!</div>
         <div class="char-select" id="charSelect">
+            <!-- Tricky -->
             <div class="char-card" data-char="s">
                 <img src="https://i.pinimg.com/1200x/ff/f0/2e/fff02eb11a310b7ac0fb88edf62393a1.jpg" alt="Tricky" loading="lazy">
                 <div class="name">Tricky</div>
                 <div class="suffix">+ s</div>
             </div>
+            <!-- Jake -->
             <div class="char-card" data-char="es">
                 <img src="https://i.pinimg.com/736x/2d/32/62/2d326200b81ad9818a548109bb826227.jpg" alt="Jake" loading="lazy">
                 <div class="name">Jake</div>
                 <div class="suffix">+ es</div>
             </div>
+            <!-- Fresh -->
             <div class="char-card" data-char="ies">
                 <img src="https://i.pinimg.com/736x/af/e3/1b/afe31b1bf941ad426d1cac15c301f30f.jpg" alt="Fresh" loading="lazy">
                 <div class="name">Fresh</div>
                 <div class="suffix">+ ies</div>
             </div>
         </div>
-        <div style="color:#fff; font-weight:bold; font-size:1.1rem;">Choose speed:</div>
+        <div style="color:#fff; font-weight:bold; font-size:1.1rem; text-shadow: 2px 2px 0 #000;">Choose speed:</div>
         <div class="speed-select">
-            <button class="speed-btn" data-speed="0.5">🐢 Slow</button>
-            <button class="speed-btn active" data-speed="1.0">🐇 Medium</button>
-            <button class="speed-btn" data-speed="1.5">🚀 Fast</button>
+            <button class="speed-btn" data-speed="0.1">🐢 Slow</button>
+            <button class="speed-btn active" data-speed="0.2">🐇 Medium</button>
+            <button class="speed-btn" data-speed="0.3">🚀 Fast</button>
         </div>
         <button id="startBtn" disabled>▶ PLAY</button>
         <div class="controls-hint">⬅️ ➡️  or swipe to move</div>
     </div>
 
+    <!-- ИГРОВОЙ ЭКРАН -->
     <div id="gameScreen">
         <div class="top-bar">
             <span>🏆 <span id="scoreDisplay">0</span> / 10</span>
@@ -310,6 +325,7 @@
         </div>
     </div>
 
+    <!-- ЭКРАН ПОБЕДЫ -->
     <div id="resultScreen">
         <h2 class="win-title">🎉 You Win!</h2>
         <p>Collected all 10 coins!</p>
@@ -327,17 +343,18 @@
         ies: ['try','dry','study','fly','cry','carry','worry','copy','marry','hurry','apply','reply','supply','rely','fry']
     };
     const CHAR_NAMES = { s: 'Tricky', es: 'Jake', ies: 'Fresh' };
-    const SPEED_NAMES = { 0.5: 'Slow', 1.0: 'Medium', 1.5: 'Fast' };
+    const SPEED_NAMES = { 0.1: 'Slow', 0.2: 'Medium', 0.3: 'Fast' };
     const WIN_SCORE = 10;
 
     // ============================================================
     //  STATE
     // ============================================================
-    let selectedChar = null;
-    let selectedSpeed = 1.0;
+    let selectedChar = null;       // 's', 'es', 'ies'
+    let selectedSpeed = 0.2;      // pixels per frame
     let gameRunning = false;
     let score = 0;
 
+    // Game objects
     let player = { lane: 1, x: 0, y: 0, width: 44, height: 56 };
     let coins = [];
     let obstacles = [];
@@ -351,6 +368,7 @@
     const OBSTACLE_HEIGHT = 50;
     const PLAYER_Y_OFFSET = 420;
 
+    // DOM
     const startScreen = document.getElementById('startScreen');
     const gameScreen = document.getElementById('gameScreen');
     const resultScreen = document.getElementById('resultScreen');
@@ -454,15 +472,15 @@
     }
 
     function update() {
-        // Coin spawn – increased intervals to avoid overlapping
-        const coinInterval = Math.max(45, 90 - selectedSpeed * 20);
+        // Spawn coins - БОЛЬШОЕ РАССТОЯНИЕ (очень большой интервал)
+        const coinInterval = Math.max(180, 250 - selectedSpeed * 100);
         if (++spawnCounter >= coinInterval) {
             spawnCounter = 0;
             spawnCoin();
         }
 
-        // Obstacle spawn – rare
-        const obstacleInterval = Math.max(100, 200 - selectedSpeed * 30);
+        // Spawn obstacles - БОЛЬШОЕ РАССТОЯНИЕ
+        const obstacleInterval = Math.max(200, 300 - selectedSpeed * 100);
         if (++obstacleSpawnCounter >= obstacleInterval) {
             obstacleSpawnCounter = 0;
             spawnObstacle();
@@ -495,7 +513,7 @@
             }
         }
 
-        // Move obstacles – subtract 1 point on collision
+        // Move obstacles – now they subtract 1 point instead of game over
         for (let i = obstacles.length - 1; i >= 0; i--) {
             const ob = obstacles[i];
             ob.y += selectedSpeed;
@@ -503,10 +521,12 @@
                 const playerRect = { x: player.x, y: player.y, width: player.width, height: player.height };
                 const obRect = { x: ob.x, y: ob.y, width: ob.width, height: ob.height };
                 if (rectCollide(playerRect, obRect)) {
+                    // Subtract 1 point if possible
                     if (score > 0) {
                         score--;
                         scoreDisplay.textContent = score;
                     }
+                    // Remove the obstacle
                     obstacles.splice(i, 1);
                     continue;
                 }
@@ -520,50 +540,82 @@
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Яркий граффити-фон с градиентом
         const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-        gradient.addColorStop(0, '#0f1a2a');
-        gradient.addColorStop(0.5, '#1a2f3f');
-        gradient.addColorStop(1, '#2a4b5e');
+        gradient.addColorStop(0, '#ff006e');
+        gradient.addColorStop(0.3, '#8338ec');
+        gradient.addColorStop(0.6, '#3a86ff');
+        gradient.addColorStop(1, '#06ffa5');
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Speed lines
-        ctx.strokeStyle = '#ffd70022';
-        ctx.lineWidth = 2;
-        for (let i = 0; i < 20; i++) {
-            const y = (i * 30 + performance.now() * 0.05 * selectedSpeed * 5) % canvas.height;
+        // Граффити-теги (абстрактные формы)
+        const time = performance.now() * 0.001;
+        ctx.globalAlpha = 0.3;
+        
+        // Розовые круги
+        ctx.fillStyle = '#ff006e';
+        for (let i = 0; i < 5; i++) {
+            const x = (i * 150 + time * 20) % (canvas.width + 100) - 50;
+            const y = 100 + Math.sin(time + i) * 30;
+            ctx.beginPath();
+            ctx.arc(x, y, 40, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        // Желтые звезды
+        ctx.fillStyle = '#ffbe0b';
+        for (let i = 0; i < 4; i++) {
+            const x = 100 + i * 150;
+            const y = (i * 120 + time * 30) % (canvas.height + 100) - 50;
+            ctx.beginPath();
+            ctx.arc(x, y, 30, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        ctx.globalAlpha = 1;
+
+        // Speed lines (неоновые)
+        ctx.strokeStyle = '#ffbe0b88';
+        ctx.lineWidth = 3;
+        for (let i = 0; i < 15; i++) {
+            const y = (i * 40 + performance.now() * 0.1 * selectedSpeed * 10) % canvas.height;
             ctx.beginPath();
             ctx.moveTo(0, y);
-            ctx.lineTo(canvas.width, y + 40);
+            ctx.lineTo(canvas.width, y + 50);
             ctx.stroke();
         }
 
-        // Lanes
+        // Lanes (яркие неоновые линии)
         for (let i = 0; i < LANE_COUNT; i++) {
             const x = i * LANE_WIDTH;
-            ctx.strokeStyle = '#ffffff33';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(x, 0, LANE_WIDTH, canvas.height);
-            ctx.shadowColor = '#ffd70022';
-            ctx.shadowBlur = 10;
+            ctx.strokeStyle = '#ffbe0b';
+            ctx.lineWidth = 3;
+            ctx.shadowColor = '#ffbe0b';
+            ctx.shadowBlur = 15;
             ctx.strokeRect(x, 0, LANE_WIDTH, canvas.height);
             ctx.shadowBlur = 0;
-            ctx.fillStyle = '#ffffff22';
+            
+            // Пунктирные линии
+            ctx.fillStyle = '#ffffff';
             for (let y = 0; y < canvas.height; y += 50) {
-                ctx.fillRect(x + LANE_WIDTH/2 - 2, y, 4, 25);
+                ctx.fillRect(x + LANE_WIDTH/2 - 3, y, 6, 25);
             }
         }
 
-        // Obstacles
+        // Obstacles (яркие красные с неоновым эффектом)
         obstacles.forEach(ob => {
             const x = ob.x, y = ob.y, w = ob.width, h = ob.height;
-            ctx.shadowColor = '#e74c3c';
-            ctx.shadowBlur = 20;
-            ctx.fillStyle = '#c0392b';
+            ctx.shadowColor = '#ff006e';
+            ctx.shadowBlur = 25;
+            ctx.fillStyle = '#ff006e';
             ctx.beginPath();
             ctx.roundRect(x, y, w, h, 8);
             ctx.fill();
             ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#ffbe0b';
+            ctx.lineWidth = 3;
+            ctx.stroke();
             ctx.fillStyle = '#fff';
             ctx.font = 'bold 24px sans-serif';
             ctx.textAlign = 'center';
@@ -571,20 +623,20 @@
             ctx.fillText('⚠️', x + w/2, y + h/2 + 2);
         });
 
-        // Coins
+        // Coins (яркие желтые с неоновым свечением)
         coins.forEach(coin => {
             const x = coin.x, y = coin.y, size = coin.size;
-            ctx.shadowColor = '#ffd700';
-            ctx.shadowBlur = 25;
+            ctx.shadowColor = '#ffbe0b';
+            ctx.shadowBlur = 30;
             ctx.beginPath();
             ctx.arc(x + size/2, y + size/2, size/2, 0, Math.PI*2);
-            ctx.fillStyle = '#ffd700';
+            ctx.fillStyle = '#ffbe0b';
             ctx.fill();
             ctx.shadowBlur = 0;
-            ctx.strokeStyle = '#f39c12';
-            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#fb5607';
+            ctx.lineWidth = 4;
             ctx.stroke();
-            ctx.fillStyle = '#1a2f3f';
+            ctx.fillStyle = '#000';
             ctx.font = 'bold 14px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
@@ -592,16 +644,19 @@
             ctx.fillText(word, x + size/2, y + size/2 + 1);
         });
 
-        // Player
+        // Player (яркий с неоновым эффектом)
         const px = player.x, py = player.y;
-        ctx.shadowColor = '#ffd700';
-        ctx.shadowBlur = 30;
-        ctx.fillStyle = '#3498db';
+        ctx.shadowColor = '#06ffa5';
+        ctx.shadowBlur = 35;
+        ctx.fillStyle = '#06ffa5';
         ctx.beginPath();
         ctx.roundRect(px, py, player.width, player.height, 12);
         ctx.fill();
         ctx.shadowBlur = 0;
-        ctx.fillStyle = '#fff';
+        ctx.strokeStyle = '#ffbe0b';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        ctx.fillStyle = '#000';
         ctx.font = '36px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -611,17 +666,23 @@
         else if (selectedChar === 'ies') emoji = '🐱';
         ctx.fillText(emoji, px + player.width/2, py + player.height/2 - 2);
 
-        ctx.fillStyle = '#ffd700';
+        ctx.fillStyle = '#ffbe0b';
         ctx.font = 'bold 12px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'bottom';
+        ctx.shadowColor = '#000';
+        ctx.shadowBlur = 5;
         ctx.fillText(CHAR_NAMES[selectedChar], px + player.width/2, py - 4);
+        ctx.shadowBlur = 0;
 
-        ctx.fillStyle = '#ffffffcc';
+        ctx.fillStyle = '#ffffff';
         ctx.font = 'bold 16px sans-serif';
         ctx.textAlign = 'right';
         ctx.textBaseline = 'top';
+        ctx.shadowColor = '#000';
+        ctx.shadowBlur = 5;
         ctx.fillText('Goal: ' + score + '/' + WIN_SCORE, canvas.width - 15, 12);
+        ctx.shadowBlur = 0;
     }
 
     function showWin() {
@@ -691,8 +752,8 @@
         startBtn.disabled = true;
         selectedChar = null;
         speedBtns.forEach(b => b.classList.remove('active'));
-        document.querySelector('.speed-btn[data-speed="1.0"]').classList.add('active');
-        selectedSpeed = 1.0;
+        document.querySelector('.speed-btn[data-speed="0.2"]').classList.add('active');
+        selectedSpeed = 0.2;
     });
 
     startBtn.addEventListener('click', startGame);
@@ -700,8 +761,8 @@
     // ============================================================
     //  INIT
     // ============================================================
-    document.querySelector('.speed-btn[data-speed="1.0"]').classList.add('active');
-    selectedSpeed = 1.0;
+    document.querySelector('.speed-btn[data-speed="0.2"]').classList.add('active');
+    selectedSpeed = 0.2;
 
     if (!CanvasRenderingContext2D.prototype.roundRect) {
         CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
