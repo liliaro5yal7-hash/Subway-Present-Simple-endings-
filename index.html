@@ -295,9 +295,9 @@
         </div>
         <div style="color:#fff; font-weight:bold; font-size:1.1rem; text-shadow: 2px 2px 0 #000;">Choose speed:</div>
         <div class="speed-select">
-            <button class="speed-btn" data-speed="0.8">🐢 Slow</button>
-            <button class="speed-btn active" data-speed="1.0">🐇 Medium</button>
-            <button class="speed-btn" data-speed="1.2">🚀 Fast</button>
+            <button class="speed-btn" data-speed="0.3">🐢 Slow</button>
+            <button class="speed-btn active" data-speed="0.5">🐇 Medium</button>
+            <button class="speed-btn" data-speed="0.7">🚀 Fast</button>
         </div>
         <button id="startBtn" disabled>▶ PLAY</button>
         <div class="controls-hint">⬅️ ➡️  or tap left/right side of screen</div>
@@ -332,14 +332,14 @@
         ies: ['try','dry','study','fly','cry','carry','worry','copy','marry','hurry','apply','reply','supply','rely','fry']
     };
     const CHAR_NAMES = { s: 'Tricky', es: 'Jake', ies: 'Fresh' };
-    const SPEED_NAMES = { 0.8: 'Slow', 1.0: 'Medium', 1.2: 'Fast' };
+    const SPEED_NAMES = { 0.3: 'Slow', 0.5: 'Medium', 0.7: 'Fast' };
     const WIN_SCORE = 10;
 
     // ============================================================
     //  STATE
     // ============================================================
     let selectedChar = null;
-    let selectedSpeed = 1.0;
+    let selectedSpeed = 0.5;
     let gameRunning = false;
     let score = 0;
 
@@ -356,10 +356,13 @@
     const PLAYER_Y_OFFSET = 420;
     const MIN_DIST_BETWEEN_OBJECTS = 160;
 
-    // Новые интервалы спавна – монеты появляются гораздо чаще
-    const MIN_SPAWN_INTERVAL = 80;
-    const MAX_SPAWN_INTERVAL = 180;
-    let nextSpawnInterval = 120;
+    // Новые интервалы спавна (реже)
+    const MIN_SPAWN_INTERVAL = 150;
+    const MAX_SPAWN_INTERVAL = 300;
+    let nextSpawnInterval = 220;
+
+    // Вероятность монет: 75% (препятствия 25%)
+    const COIN_PROBABILITY = 0.75;
 
     const startScreen = document.getElementById('startScreen');
     const gameScreen = document.getElementById('gameScreen');
@@ -403,7 +406,6 @@
         return lane * LANE_WIDTH + (LANE_WIDTH - player.width) / 2;
     }
 
-    // Проверка близости для препятствий
     function isTooClose(lane, yPos, objects) {
         for (let obj of objects) {
             if (obj.lane === lane && Math.abs(obj.y - yPos) < MIN_DIST_BETWEEN_OBJECTS) {
@@ -413,29 +415,33 @@
         return false;
     }
 
-    // Спавн одной монеты на указанной дорожке (без проверки близости)
-    function spawnCoinOnLane(lane) {
+    // Спавн одной монеты на указанной дорожке с возможностью задать вертикальное смещение
+    function spawnCoinOnLane(lane, yOffset = 0) {
         const types = ['s', 'es', 'ies'];
         const type = types[Math.floor(Math.random() * types.length)];
         const wordList = VERBS[type];
         const word = wordList[Math.floor(Math.random() * wordList.length)];
         const x = lane * LANE_WIDTH + (LANE_WIDTH - COIN_SIZE) / 2;
-        const yPos = -COIN_SIZE - Math.random() * 20; // небольшой разброс по вертикали
+        const yPos = -COIN_SIZE - yOffset; // отрицательное смещение вверх, чтобы разнести по вертикали
         coins.push({
             x, y: yPos, lane, type, word,
             size: COIN_SIZE, active: true
         });
     }
 
-    // Спавн нескольких монет (2-3) на разных дорожках
+    // Спавн 1-2 монет на разных дорожках с асинхронным разбросом по вертикали
     function spawnMultipleCoins() {
-        // Перемешиваем дорожки и берём первые 2 или 3
         const lanes = [0, 1, 2];
-        const count = Math.floor(Math.random() * 2) + 2; // 2 или 3
+        // Перемешиваем и берём 1 или 2 дорожки
         const shuffled = lanes.sort(() => Math.random() - 0.5);
+        const count = Math.random() < 0.5 ? 1 : 2; // 1 или 2 монеты за раз
         const selectedLanes = shuffled.slice(0, count);
-        for (let lane of selectedLanes) {
-            spawnCoinOnLane(lane);
+        // Для каждой выбранной дорожки задаём разный вертикальный сдвиг (асинхронность)
+        for (let idx = 0; idx < selectedLanes.length; idx++) {
+            const lane = selectedLanes[idx];
+            // Сдвиг от 0 до 80 пикселей, чтобы монеты были на разной высоте
+            const yOffset = idx * 50 + Math.random() * 40;
+            spawnCoinOnLane(lane, yOffset);
         }
     }
 
@@ -444,9 +450,7 @@
         const lane = Math.floor(Math.random() * LANE_COUNT);
         const x = lane * LANE_WIDTH + (LANE_WIDTH - OBSTACLE_WIDTH) / 2;
         const yPos = -OBSTACLE_HEIGHT;
-        // Проверяем, нет ли объектов близко на этой дорожке
         if (isTooClose(lane, yPos, coins) || isTooClose(lane, yPos, obstacles)) {
-            // Пробуем другие дорожки
             for (let altLane = 0; altLane < LANE_COUNT; altLane++) {
                 if (altLane !== lane && !isTooClose(altLane, yPos, coins) && !isTooClose(altLane, yPos, obstacles)) {
                     const altX = altLane * LANE_WIDTH + (LANE_WIDTH - OBSTACLE_WIDTH) / 2;
@@ -458,7 +462,6 @@
                     return;
                 }
             }
-            // Если все дорожки заняты – ничего не спавним
             return;
         }
         obstacles.push({
@@ -484,7 +487,7 @@
         coins = [];
         obstacles = [];
         spawnCounter = 0;
-        nextSpawnInterval = 120;
+        nextSpawnInterval = 220;
         player.lane = 1;
         player.x = getLaneX(1);
         player.y = PLAYER_Y_OFFSET;
@@ -511,8 +514,7 @@
             spawnCounter = 0;
             nextSpawnInterval = Math.floor(Math.random() * (MAX_SPAWN_INTERVAL - MIN_SPAWN_INTERVAL + 1)) + MIN_SPAWN_INTERVAL;
 
-            // Решаем, что спавнить: 80% монеты (2-3 штуки), 20% препятствие
-            if (Math.random() < 0.8) {
+            if (Math.random() < COIN_PROBABILITY) {
                 spawnMultipleCoins();
             } else {
                 spawnObstacle();
@@ -822,8 +824,8 @@
         startBtn.disabled = true;
         selectedChar = null;
         speedBtns.forEach(b => b.classList.remove('active'));
-        document.querySelector('.speed-btn[data-speed="1.0"]').classList.add('active');
-        selectedSpeed = 1.0;
+        document.querySelector('.speed-btn[data-speed="0.5"]').classList.add('active');
+        selectedSpeed = 0.5;
     });
 
     startBtn.addEventListener('click', startGame);
@@ -831,8 +833,8 @@
     // ============================================================
     //  INIT
     // ============================================================
-    document.querySelector('.speed-btn[data-speed="1.0"]').classList.add('active');
-    selectedSpeed = 1.0;
+    document.querySelector('.speed-btn[data-speed="0.5"]').classList.add('active');
+    selectedSpeed = 0.5;
 
     if (!CanvasRenderingContext2D.prototype.roundRect) {
         CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
