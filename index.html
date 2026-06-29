@@ -295,9 +295,9 @@
         </div>
         <div style="color:#fff; font-weight:bold; font-size:1.1rem; text-shadow: 2px 2px 0 #000;">Choose speed:</div>
         <div class="speed-select">
-            <button class="speed-btn" data-speed="0.55">🐢 Slow</button>
-            <button class="speed-btn active" data-speed="0.75">🐇 Medium</button>
-            <button class="speed-btn" data-speed="0.95">🚀 Fast</button>
+            <button class="speed-btn" data-speed="0.8">🐢 Slow</button>
+            <button class="speed-btn active" data-speed="1.0">🐇 Medium</button>
+            <button class="speed-btn" data-speed="1.2">🚀 Fast</button>
         </div>
         <button id="startBtn" disabled>▶ PLAY</button>
         <div class="controls-hint">⬅️ ➡️  or tap left/right side of screen</div>
@@ -332,14 +332,14 @@
         ies: ['try','dry','study','fly','cry','carry','worry','copy','marry','hurry','apply','reply','supply','rely','fry']
     };
     const CHAR_NAMES = { s: 'Tricky', es: 'Jake', ies: 'Fresh' };
-    const SPEED_NAMES = { 0.55: 'Slow', 0.75: 'Medium', 0.95: 'Fast' };
+    const SPEED_NAMES = { 0.8: 'Slow', 1.0: 'Medium', 1.2: 'Fast' };
     const WIN_SCORE = 10;
 
     // ============================================================
     //  STATE
     // ============================================================
     let selectedChar = null;
-    let selectedSpeed = 0.75;
+    let selectedSpeed = 1.0;
     let gameRunning = false;
     let score = 0;
 
@@ -703,7 +703,6 @@
     // ============================================================
     //  CONTROLS
     // ============================================================
-    // Клавиши
     document.addEventListener('keydown', (e) => {
         if (!gameRunning) return;
         if (e.key === 'ArrowLeft' && player.lane > 0) {
@@ -717,7 +716,6 @@
         }
     });
 
-    // Свайпы
     let touchStartX = 0;
     canvas.addEventListener('touchstart', (e) => {
         e.preventDefault();
@@ -746,7 +744,6 @@
         }
     }, { passive: false });
 
-    // Новое: управление нажатием (клик по левой/правой половине)
     function handleTap(e) {
         if (!gameRunning) return;
         const rect = canvas.getBoundingClientRect();
@@ -759,13 +756,11 @@
         }
         const x = (clientX - rect.left) / rect.width * canvas.width;
         if (x < canvas.width / 2) {
-            // левая половина - влево
             if (player.lane > 0) {
                 player.lane--;
                 player.x = getLaneX(player.lane);
             }
         } else {
-            // правая половина - вправо
             if (player.lane < LANE_COUNT - 1) {
                 player.lane++;
                 player.x = getLaneX(player.lane);
@@ -775,20 +770,15 @@
 
     canvas.addEventListener('click', handleTap);
     canvas.addEventListener('touchstart', (e) => {
-        // Если это одиночный тап (не свайп), обрабатываем как нажатие
-        // Для различия со свайпом используем флаг
         if (e.touches.length === 1) {
-            // Запоминаем время и позицию для отличия от свайпа
             canvas._tapStartTime = Date.now();
             canvas._tapStartX = e.touches[0].clientX;
         }
     }, { passive: true });
 
-    // Обрабатываем touchend как тап, если не было значительного движения
     canvas.addEventListener('touchend', (e) => {
         if (!gameRunning) return;
         if (canvas._tapStartTime && Date.now() - canvas._tapStartTime < 300) {
-            // Это был короткий тап без движения - считаем кликом
             const touch = e.changedTouches[0];
             const rect = canvas.getBoundingClientRect();
             const x = (touch.clientX - rect.left) / rect.width * canvas.width;
@@ -824,8 +814,8 @@
         startBtn.disabled = true;
         selectedChar = null;
         speedBtns.forEach(b => b.classList.remove('active'));
-        document.querySelector('.speed-btn[data-speed="0.75"]').classList.add('active');
-        selectedSpeed = 0.75;
+        document.querySelector('.speed-btn[data-speed="1.0"]').classList.add('active');
+        selectedSpeed = 1.0;
     });
 
     startBtn.addEventListener('click', startGame);
@@ -833,8 +823,8 @@
     // ============================================================
     //  INIT
     // ============================================================
-    document.querySelector('.speed-btn[data-speed="0.75"]').classList.add('active');
-    selectedSpeed = 0.75;
+    document.querySelector('.speed-btn[data-speed="1.0"]').classList.add('active');
+    selectedSpeed = 1.0;
 
     if (!CanvasRenderingContext2D.prototype.roundRect) {
         CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
