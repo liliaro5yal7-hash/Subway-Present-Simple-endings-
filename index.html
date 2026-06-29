@@ -354,11 +354,13 @@
     const OBSTACLE_WIDTH = 50;
     const OBSTACLE_HEIGHT = 50;
     const PLAYER_Y_OFFSET = 420;
-    const MIN_DIST_BETWEEN_OBJECTS = 160;
+    // Увеличили минимальное расстояние между объектами на одной дорожке
+    const MIN_DIST_BETWEEN_OBJECTS = 250;
 
-    const MIN_SPAWN_INTERVAL = 150;
-    const MAX_SPAWN_INTERVAL = 300;
-    let nextSpawnInterval = 220;
+    // Увеличили интервалы спавна (объекты появляются реже)
+    const MIN_SPAWN_INTERVAL = 200;
+    const MAX_SPAWN_INTERVAL = 450;
+    let nextSpawnInterval = 300;
     const COIN_PROBABILITY = 0.75;
 
     const startScreen = document.getElementById('startScreen');
@@ -428,11 +430,13 @@
     function spawnMultipleCoins() {
         const lanes = [0, 1, 2];
         const shuffled = lanes.sort(() => Math.random() - 0.5);
-        const count = Math.random() < 0.5 ? 1 : 2;
+        // Вероятность 2-х монет снижена до 30%
+        const count = Math.random() < 0.3 ? 2 : 1;
         const selectedLanes = shuffled.slice(0, count);
         for (let idx = 0; idx < selectedLanes.length; idx++) {
             const lane = selectedLanes[idx];
-            const yOffset = idx * 50 + Math.random() * 40;
+            // Увеличили вертикальный разброс между монетами
+            const yOffset = idx * 80 + Math.random() * 60;
             spawnCoinOnLane(lane, yOffset);
         }
     }
@@ -478,7 +482,7 @@
         coins = [];
         obstacles = [];
         spawnCounter = 0;
-        nextSpawnInterval = 220;
+        nextSpawnInterval = 300;
         player.lane = 1;
         player.x = getLaneX(1);
         player.y = PLAYER_Y_OFFSET;
@@ -512,6 +516,7 @@
             }
         }
 
+        // Движение монет
         for (let i = coins.length - 1; i >= 0; i--) {
             const coin = coins[i];
             coin.y += selectedSpeed;
@@ -538,6 +543,7 @@
             }
         }
 
+        // Движение препятствий
         for (let i = obstacles.length - 1; i >= 0; i--) {
             const ob = obstacles[i];
             ob.y += selectedSpeed;
